@@ -267,7 +267,7 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>Class:</span>
             <select value={activeClassId || ""} onChange={e => setActiveClass(e.target.value || null)}
-              style={{ ...inputStyle, width: "auto", minWidth: 200, padding: "6px 12px", fontSize: 13, borderColor: "rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.12)", color: C.white }}>
+              style={{ ...inputStyle, width: "auto", minWidth: 200, padding: "6px 12px", fontSize: 13, borderColor: C.blueDark, background: C.white, color: C.text }}>
               <option value="">— Select Class —</option>
               {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
