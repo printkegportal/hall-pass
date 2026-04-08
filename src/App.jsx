@@ -3,6 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 
 const DESTINATIONS = ["Bathroom", "Nurse", "Office", "Library", "Counselor", "Water Fountain"];
 const FLAG_MINUTES = 10;
+const SB_URL = "https://yzdeyaxjvfiqlagfmttv.supabase.co";
+const SB_KEY = "sb_publishable_uw1fX_S-caaqiXsLi2ufeA_wnR7hUcP";
+const APP_USER = "melissamoore16@gmail.com";
+const APP_PASS = "zombie";
+const supabaseClient = createClient(SB_URL, SB_KEY);
 
 function formatTime(ts) { return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
 function formatDate(ts) { return new Date(ts).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }); }
@@ -23,53 +28,46 @@ const btnGhost = {
   color: "#888", cursor: "pointer", fontFamily: "'Courier New', monospace", fontSize: 11
 };
 
-// ─── Setup Screen ────────────────────────────────────────────────────────────
-function SetupScreen({ onConnect }) {
-  const [url, setUrl] = useState("");
-  const [key, setKey] = useState("");
+// ─── Login Screen ────────────────────────────────────────────────────────────
+function LoginScreen({ onLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  async function handleConnect() {
-    if (!url || !key) return setError("Both fields are required.");
-    setLoading(true); setError("");
-    try {
-      const client = createClient(url.trim(), key.trim(), {
-        auth: { persistSession: true }
-      });
-      const { error: e } = await client.from("students").select("id").limit(1);
-      if (e) throw new Error(e.message);
-      localStorage.setItem("sb_url", url.trim());
-      localStorage.setItem("sb_key", key.trim());
-      onConnect(client);
-    } catch { setError("Could not connect. Check your URL and key, and confirm the tables exist."); }
-    setLoading(false);
+  function handleLogin() {
+    if (email.trim() === APP_USER && password === APP_PASS) {
+      localStorage.setItem("logged_in", "1");
+      onLogin();
+    } else {
+      setError("Incorrect email or password.");
+    }
   }
 
   return (
     <div style={{ minHeight: "100vh", background: "#0f0f23", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Courier New', monospace", padding: 20 }}>
-      <div style={{ background: "#1a1a2e", border: "1px solid #f0c040", borderRadius: 20, padding: 40, width: "100%", maxWidth: 480 }}>
+      <div style={{ background: "#1a1a2e", border: "1px solid #f0c040", borderRadius: 20, padding: 40, width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>🏫</div>
           <div style={{ color: "#f0c040", fontSize: 11, letterSpacing: 3, textTransform: "uppercase" }}>Hall Pass Tracker</div>
-          <div style={{ color: "#888", fontSize: 12, marginTop: 8 }}>Enter your Supabase credentials to connect</div>
+          <div style={{ color: "#888", fontSize: 12, marginTop: 8 }}>Sign in to continue</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
-            <label style={{ color: "#aaa", fontSize: 10, letterSpacing: 2, display: "block", marginBottom: 6 }}>SUPABASE PROJECT URL</label>
-            <input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" style={inputStyle} />
+            <label style={{ color: "#aaa", fontSize: 10, letterSpacing: 2, display: "block", marginBottom: 6 }}>EMAIL</label>
+            <input value={email} onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              placeholder="your@email.com" style={inputStyle} />
           </div>
           <div>
-            <label style={{ color: "#aaa", fontSize: 10, letterSpacing: 2, display: "block", marginBottom: 6 }}>SUPABASE ANON KEY</label>
-            <input value={key} onChange={e => setKey(e.target.value)} type="password" placeholder="eyJ..." style={inputStyle} />
+            <label style={{ color: "#aaa", fontSize: 10, letterSpacing: 2, display: "block", marginBottom: 6 }}>PASSWORD</label>
+            <input value={password} onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              type="password" placeholder="••••••••" style={inputStyle} />
           </div>
           {error && <div style={{ color: "#ff8888", fontSize: 12, background: "#2a1010", border: "1px solid #aa4444", borderRadius: 8, padding: "10px 14px" }}>{error}</div>}
-          <button onClick={handleConnect} disabled={loading} style={{ ...btnGold, marginTop: 8, padding: 14, fontSize: 13, letterSpacing: 2 }}>
-            {loading ? "CONNECTING..." : "CONNECT →"}
+          <button onClick={handleLogin} style={{ ...btnGold, marginTop: 8, padding: 14, fontSize: 13, letterSpacing: 2 }}>
+            SIGN IN →
           </button>
-        </div>
-        <div style={{ marginTop: 24, padding: 16, background: "#0d1b2a", borderRadius: 10, fontSize: 11, color: "#666", lineHeight: 1.8 }}>
-          <strong style={{ color: "#888" }}>First time?</strong> See SETUP.md for step-by-step instructions including the SQL to create your tables.
         </div>
       </div>
     </div>
@@ -78,8 +76,8 @@ function SetupScreen({ onConnect }) {
 
 // ─── Main App ────────────────────────────────────────────────────────────────
 export default function App() {
-  const [supabase, setSupabase] = useState(null);
-  const [teacherName, setTeacherName] = useState(localStorage.getItem("teacher_name") || "Mrs. Johnson");
+  const [loggedIn, setLoggedIn] = useState(localStorage.getItem("logged_in") === "1");
+  const [teacherName, setTeacherName] = useState(localStorage.getItem("teacher_name") || "Mrs. Moore");
   const [editingSetup, setEditingSetup] = useState(false);
   const [tab, setTab] = useState("dashboard");
 
@@ -97,53 +95,46 @@ export default function App() {
   const [printPass, setPrintPass] = useState(null);
   const [tick, setTick] = useState(0);
 
-  useEffect(() => {
-    const url = localStorage.getItem("sb_url");
-    const key = localStorage.getItem("sb_key");
-    if (url && key) setSupabase(createClient(url, key));
-  }, []);
+  const sb = supabaseClient;
 
   useEffect(() => { const i = setInterval(() => setTick(t => t + 1), 15000); return () => clearInterval(i); }, []);
 
   const loadClasses = useCallback(async () => {
-    if (!supabase) return;
-    const { data } = await supabase.from("classes").select("*").order("name");
+    const { data } = await sb.from("classes").select("*").order("name");
     setClasses(data || []);
-  }, [supabase]);
+  }, []);
 
   const loadAllStudents = useCallback(async () => {
-    if (!supabase) return;
-    const { data } = await supabase.from("students").select("*").order("name");
+    const { data } = await sb.from("students").select("*").order("name");
     setAllStudents(data || []);
-  }, [supabase]);
+  }, []);
 
   const loadClassStudents = useCallback(async () => {
-    if (!supabase || !activeClassId) { setClassStudents([]); return; }
-    const { data } = await supabase
+    if (!activeClassId) { setClassStudents([]); return; }
+    const { data } = await sb
       .from("class_students")
       .select("student_id, students(id, name)")
       .eq("class_id", activeClassId);
     const sorted = (data || []).map(r => r.students).filter(Boolean).sort((a,b) => a.name.localeCompare(b.name));
     setClassStudents(sorted);
-  }, [supabase, activeClassId]);
+  }, [activeClassId]);
 
   const loadCurrentOut = useCallback(async () => {
-    if (!supabase || !activeClassId) { setCurrentOut([]); return; }
-    const { data } = await supabase.from("passes").select("*, students(name)")
+    if (!activeClassId) { setCurrentOut([]); return; }
+    const { data } = await sb.from("passes").select("*, students(name)")
       .eq("class_id", activeClassId).is("time_in", null).order("time_out");
     setCurrentOut(data || []);
-  }, [supabase, activeClassId]);
+  }, [activeClassId]);
 
   const loadHistory = useCallback(async () => {
-    if (!supabase) return;
-    let q = supabase.from("passes").select("*, students(name), classes(name)")
+    let q = sb.from("passes").select("*, students(name), classes(name)")
       .not("time_in", "is", null).order("time_out", { ascending: false }).limit(300);
     if (historyFilter === "flagged") q = q.eq("flagged", true);
     else if (historyFilter.startsWith("class:")) q = q.eq("class_id", historyFilter.replace("class:", ""));
     else if (historyFilter !== "all") q = q.eq("student_id", historyFilter);
     const { data } = await q;
     setHistory(data || []);
-  }, [supabase, historyFilter]);
+  }, [historyFilter]);
 
   useEffect(() => { loadClasses(); loadAllStudents(); }, [loadClasses, loadAllStudents]);
   useEffect(() => { loadClassStudents(); loadCurrentOut(); }, [loadClassStudents, loadCurrentOut]);
@@ -165,7 +156,7 @@ export default function App() {
     if (!selectedStudent || !activeClassId) return;
     const student = classStudents.find(s => s.id === selectedStudent);
     const now = new Date().toISOString();
-    const { data, error } = await supabase.from("passes").insert({
+    const { data, error } = await sb.from("passes").insert({
       student_id: student.id, student_name: student.name,
       class_id: activeClassId, destination: selectedDest,
       time_out: now, flagged: false,
@@ -178,7 +169,7 @@ export default function App() {
     if (!pass) return;
     const now = new Date();
     const mins = elapsedMins(pass.time_out);
-    await supabase.from("passes").update({
+    await sb.from("passes").update({
       time_in: now.toISOString(),
       duration_seconds: Math.floor((now - new Date(pass.time_out)) / 1000),
       flagged: mins >= FLAG_MINUTES,
@@ -186,7 +177,7 @@ export default function App() {
     loadCurrentOut(); loadHistory();
   }
 
-  if (!supabase) return <SetupScreen onConnect={setSupabase} />;
+  if (!loggedIn) return <LoginScreen onLogin={() => setLoggedIn(true)} />;
 
   const availableStudents = classStudents.filter(s => !currentOut.find(o => o.student_id === s.id));
   const flaggedOut = currentOut.filter(p => elapsedMins(p.time_out) >= FLAG_MINUTES).length;
@@ -218,8 +209,8 @@ export default function App() {
         )}
 
         <button onClick={() => setEditingSetup(!editingSetup)} style={{ ...btnGhost, padding: "6px 10px" }}>⚙️</button>
-        <button onClick={() => { localStorage.removeItem("sb_url"); localStorage.removeItem("sb_key"); setSupabase(null); }}
-          style={{ ...btnGhost, padding: "6px 10px", fontSize: 10 }}>Disconnect</button>
+        <button onClick={() => { localStorage.removeItem("logged_in"); setLoggedIn(false); }}
+          style={{ ...btnGhost, padding: "6px 10px", fontSize: 10 }}>Sign Out</button>
       </div>
 
       {/* Tabs */}
@@ -260,12 +251,12 @@ export default function App() {
         )}
 
         {tab === "classes" && (
-          <ClassesTab supabase={supabase} classes={classes} allStudents={allStudents}
+          <ClassesTab classes={classes} allStudents={allStudents}
             onRefresh={() => { loadClasses(); loadAllStudents(); loadClassStudents(); }} />
         )}
 
         {tab === "roster" && (
-          <RosterTab supabase={supabase} allStudents={allStudents} classes={classes}
+          <RosterTab allStudents={allStudents} classes={classes}
             currentOut={currentOut} onRefresh={() => { loadAllStudents(); loadClassStudents(); }} />
         )}
       </div>
@@ -430,40 +421,40 @@ function HistoryTab({ history, historyFilter, setHistoryFilter, allStudents, cla
 }
 
 // ─── Classes Tab ─────────────────────────────────────────────────────────────
-function ClassesTab({ supabase, classes, allStudents, onRefresh }) {
+function ClassesTab({ classes, allStudents, onRefresh }) {
   const [newClassName, setNewClassName] = useState("");
   const [expandedClass, setExpandedClass] = useState(null);
   const [classStudentMap, setClassStudentMap] = useState({});
   const [editingClass, setEditingClass] = useState(null);
 
   async function loadClassStudents(classId) {
-    const { data } = await supabase.from("class_students").select("student_id").eq("class_id", classId);
+    const { data } = await supabaseClient.from("class_students").select("student_id").eq("class_id", classId);
     setClassStudentMap(prev => ({ ...prev, [classId]: (data || []).map(r => r.student_id) }));
   }
 
   async function addClass() {
     const name = newClassName.trim();
     if (!name) return;
-    await supabase.from("classes").insert({ name });
+    await supabaseClient.from("classes").insert({ name });
     setNewClassName(""); onRefresh();
   }
 
   async function deleteClass(id) {
     if (!confirm("Delete this class? Students and pass history are kept.")) return;
-    await supabase.from("classes").delete().eq("id", id);
+    await supabaseClient.from("classes").delete().eq("id", id);
     onRefresh();
   }
 
   async function saveClassName(id, name) {
-    await supabase.from("classes").update({ name }).eq("id", id);
+    await supabaseClient.from("classes").update({ name }).eq("id", id);
     setEditingClass(null); onRefresh();
   }
 
   async function toggleStudent(classId, studentId, enrolled) {
     if (enrolled) {
-      await supabase.from("class_students").delete().eq("class_id", classId).eq("student_id", studentId);
+      await supabaseClient.from("class_students").delete().eq("class_id", classId).eq("student_id", studentId);
     } else {
-      await supabase.from("class_students").insert({ class_id: classId, student_id: studentId });
+      await supabaseClient.from("class_students").insert({ class_id: classId, student_id: studentId });
     }
     loadClassStudents(classId);
   }
@@ -568,15 +559,15 @@ function ClassesTab({ supabase, classes, allStudents, onRefresh }) {
 }
 
 // ─── Roster Tab ──────────────────────────────────────────────────────────────
-function RosterTab({ supabase, allStudents, classes, currentOut, onRefresh }) {
+function RosterTab({ allStudents, classes, currentOut, onRefresh }) {
   const [newName, setNewName] = useState("");
   const [editingStudent, setEditingStudent] = useState(null);
   const [studentClasses, setStudentClasses] = useState({});
 
   useEffect(() => {
     async function loadEnrollments() {
-      if (!supabase) return;
-      const { data } = await supabase.from("class_students").select("student_id, class_id");
+      
+      const { data } = await supabaseClient.from("class_students").select("student_id, class_id");
       const map = {};
       (data || []).forEach(r => {
         if (!map[r.student_id]) map[r.student_id] = [];
@@ -585,24 +576,24 @@ function RosterTab({ supabase, allStudents, classes, currentOut, onRefresh }) {
       setStudentClasses(map);
     }
     loadEnrollments();
-  }, [supabase, allStudents]);
+  }, [allStudents]);
 
   async function addStudent() {
     const name = newName.trim();
     if (!name) return;
-    await supabase.from("students").insert({ name });
+    await supabaseClient.from("students").insert({ name });
     setNewName(""); onRefresh();
   }
 
   async function saveEdit() {
     if (!editingStudent?.name?.trim()) return;
-    await supabase.from("students").update({ name: editingStudent.name.trim() }).eq("id", editingStudent.id);
+    await supabaseClient.from("students").update({ name: editingStudent.name.trim() }).eq("id", editingStudent.id);
     setEditingStudent(null); onRefresh();
   }
 
   async function deleteStudent(id) {
     if (!confirm("Remove this student? Their pass history will be kept.")) return;
-    await supabase.from("students").delete().eq("id", id);
+    await supabaseClient.from("students").delete().eq("id", id);
     onRefresh();
   }
 
@@ -674,56 +665,107 @@ function TeacherEdit({ value, onSave, onCancel }) {
 }
 
 function PrintPassModal({ pass, teacherName, className, onClose }) {
-  useEffect(() => { setTimeout(() => window.print(), 300); }, []);
   const studentName = pass.students?.name || pass.student_name;
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <style>{`@media print { body > * { display:none!important } .print-pass { display:flex!important; position:fixed!important; inset:0!important; background:white!important; align-items:center!important; justify-content:center!important } .no-print{display:none!important} }`}</style>
-      <div className="print-pass" style={{ display: "contents" }}>
-        <div style={{ background: "white", borderRadius: 16, width: 480, overflow: "hidden", border: "3px solid #1a1a2e", boxShadow: "0 32px 80px rgba(0,0,0,0.5)" }}>
-          <div style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)", padding: "20px 28px", display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ fontSize: 34 }}>🏫</div>
-            <div>
-              <div style={{ color: "#f0c040", fontSize: 10, fontFamily: "'Courier New'", letterSpacing: 3, textTransform: "uppercase" }}>Hall Pass</div>
-              <div style={{ color: "white", fontSize: 17, fontFamily: "Georgia, serif", fontWeight: 700 }}>{className}</div>
-            </div>
-            <div style={{ marginLeft: "auto", textAlign: "right" }}>
-              <div style={{ color: "#f0c040", fontSize: 9, fontFamily: "'Courier New'", letterSpacing: 2 }}>TEACHER</div>
-              <div style={{ color: "white", fontSize: 13, fontFamily: "Georgia, serif" }}>{teacherName}</div>
-            </div>
-          </div>
-          <div style={{ borderTop: "3px dashed #e0c040", borderBottom: "3px dashed #e0c040", background: "#fffdf0", padding: "6px 28px", display: "flex", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 9, fontFamily: "'Courier New'", color: "#999", letterSpacing: 2 }}>✂ CUT IF NEEDED</span>
-            <span style={{ fontSize: 9, fontFamily: "'Courier New'", color: "#999", letterSpacing: 2 }}>AUTHORIZED PASS ✂</span>
-          </div>
-          <div style={{ padding: "24px 28px", background: "#fffdf0" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-              <PassField label="Student Name" value={studentName} wide />
-              <PassField label="Destination" value={pass.destination} />
-              <PassField label="Date" value={formatDate(pass.time_out)} />
-              <PassField label="Time Out" value={formatTime(pass.time_out)} />
-            </div>
-            <div style={{ borderTop: "1px solid #ccc", paddingTop: 16, display: "flex", gap: 24 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ borderBottom: "1px solid #333", minHeight: 28, marginBottom: 4 }} />
-                <div style={{ fontSize: 9, fontFamily: "'Courier New'", color: "#888", letterSpacing: 1 }}>TEACHER SIGNATURE</div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ borderBottom: "1px solid #333", minHeight: 28, marginBottom: 4, display: "flex", alignItems: "flex-end", paddingBottom: 2 }}>
-                  <span style={{ fontSize: 11, fontFamily: "'Courier New'", color: "#444" }}>Return by: ________</span>
-                </div>
-                <div style={{ fontSize: 9, fontFamily: "'Courier New'", color: "#888", letterSpacing: 1 }}>TIME LIMIT</div>
-              </div>
-            </div>
-            <div style={{ marginTop: 16, padding: 8, background: "#1a1a2e", borderRadius: 6, textAlign: "center" }}>
-              <span style={{ color: "#f0c040", fontSize: 9, fontFamily: "'Courier New'", letterSpacing: 2 }}>CARRY THIS PASS AT ALL TIMES IN THE HALLWAY</span>
-            </div>
-          </div>
+
+  useEffect(() => {
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Hall Pass – ${studentName}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Courier New', monospace; }
+    .pass { width: 480px; border: 3px solid #1a1a2e; border-radius: 16px; overflow: hidden; }
+    .header { background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 20px 28px; display: flex; align-items: center; gap: 14px; }
+    .header-icon { font-size: 34px; }
+    .header-title { color: #f0c040; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; }
+    .header-class { color: white; font-size: 17px; font-family: Georgia, serif; font-weight: 700; }
+    .header-right { margin-left: auto; text-align: right; }
+    .header-label { color: #f0c040; font-size: 9px; letter-spacing: 2px; }
+    .header-teacher { color: white; font-size: 13px; font-family: Georgia, serif; }
+    .cut { border-top: 3px dashed #e0c040; border-bottom: 3px dashed #e0c040; background: #fffdf0; padding: 6px 28px; display: flex; justify-content: space-between; }
+    .cut span { font-size: 9px; color: #999; letter-spacing: 2px; }
+    .body { padding: 24px 28px; background: #fffdf0; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .field-full { grid-column: 1 / -1; }
+    .field-label { font-size: 9px; color: #888; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+    .field-value { border-bottom: 2px solid #1a1a2e; padding-bottom: 4px; font-family: Georgia, serif; font-weight: 700; color: #1a1a2e; min-height: 28px; }
+    .field-value.large { font-size: 20px; }
+    .field-value.normal { font-size: 15px; }
+    .sigs { border-top: 1px solid #ccc; padding-top: 16px; display: flex; gap: 24px; }
+    .sig { flex: 1; }
+    .sig-line { border-bottom: 1px solid #333; min-height: 28px; margin-bottom: 4px; display: flex; align-items: flex-end; padding-bottom: 2px; }
+    .sig-label { font-size: 9px; color: #888; letter-spacing: 1px; }
+    .footer { margin-top: 16px; padding: 8px; background: #1a1a2e; border-radius: 6px; text-align: center; }
+    .footer span { color: #f0c040; font-size: 9px; letter-spacing: 2px; }
+    @media print { body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="pass">
+    <div class="header">
+      <div class="header-icon">🏫</div>
+      <div>
+        <div class="header-title">Hall Pass</div>
+        <div class="header-class">${className}</div>
+      </div>
+      <div class="header-right">
+        <div class="header-label">TEACHER</div>
+        <div class="header-teacher">${teacherName}</div>
+      </div>
+    </div>
+    <div class="cut">
+      <span>✂ CUT IF NEEDED</span>
+      <span>AUTHORIZED PASS ✂</span>
+    </div>
+    <div class="body">
+      <div class="fields">
+        <div class="field-full">
+          <div class="field-label">Student Name</div>
+          <div class="field-value large">${studentName}</div>
+        </div>
+        <div>
+          <div class="field-label">Destination</div>
+          <div class="field-value normal">${pass.destination}</div>
+        </div>
+        <div>
+          <div class="field-label">Date</div>
+          <div class="field-value normal">${formatDate(pass.time_out)}</div>
+        </div>
+        <div>
+          <div class="field-label">Time Out</div>
+          <div class="field-value normal">${formatTime(pass.time_out)}</div>
         </div>
       </div>
-      <button className="no-print" onClick={onClose} style={{ position: "fixed", top: 24, right: 24, background: "white", border: "none", borderRadius: "50%", width: 40, height: 40, fontSize: 20, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>✕</button>
+      <div class="sigs">
+        <div class="sig">
+          <div class="sig-line"></div>
+          <div class="sig-label">TEACHER SIGNATURE</div>
+        </div>
+        <div class="sig">
+          <div class="sig-line"><span style="font-size:11px;color:#444;">Return by: ________</span></div>
+          <div class="sig-label">TIME LIMIT</div>
+        </div>
+      </div>
+      <div class="footer">
+        <span>CARRY THIS PASS AT ALL TIMES IN THE HALLWAY</span>
+      </div>
     </div>
-  );
+  </div>
+  <script>setTimeout(() => { window.print(); window.close(); }, 400);</script>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank", "width=600,height=500");
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+    }
+    onClose();
+  }, []);
+
+  return null;
 }
 
 function PassField({ label, value, wide }) {
