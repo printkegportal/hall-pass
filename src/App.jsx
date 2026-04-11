@@ -453,9 +453,20 @@ function Dashboard({ activeClass, classes, availableStudents, currentOut, select
 
 // ─── History Tab ──────────────────────────────────────────────────────────────
 function HistoryTab({ history, historyFilter, setHistoryFilter, allStudents, classes }) {
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const filtered = history.filter(entry => {
+    if (!dateFrom && !dateTo) return true;
+    const d = new Date(entry.time_out);
+    if (dateFrom && d < new Date(dateFrom)) return false;
+    if (dateTo && d > new Date(dateTo + "T23:59:59")) return false;
+    return true;
+  });
+
   return (
     <>
-      <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 10, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
         <div style={{ fontSize: 12, color: C.gray, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, flex: 1 }}>Pass History</div>
         <select value={historyFilter} onChange={e => setHistoryFilter(e.target.value)}
           style={{ ...inputStyle, width: "auto", minWidth: 220 }}>
@@ -469,11 +480,25 @@ function HistoryTab({ history, historyFilter, setHistoryFilter, allStudents, cla
           </optgroup>
         </select>
       </div>
-      {history.length === 0 ? (
+      {/* Date range */}
+      <div style={{ display: "flex", gap: 10, marginBottom: 20, alignItems: "center", flexWrap: "wrap" }}>
+        <span style={{ fontSize: 12, color: C.gray, fontWeight: 600 }}>Date:</span>
+        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+          style={{ ...inputStyle, width: "auto", fontSize: 13, padding: "7px 12px" }} />
+        <span style={{ fontSize: 13, color: C.gray }}>to</span>
+        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+          style={{ ...inputStyle, width: "auto", fontSize: 13, padding: "7px 12px" }} />
+        {(dateFrom || dateTo) && (
+          <button onClick={() => { setDateFrom(""); setDateTo(""); }}
+            style={{ ...btnSecondary, padding: "7px 12px", fontSize: 12 }}>Clear</button>
+        )}
+        <span style={{ fontSize: 12, color: C.gray, marginLeft: 4 }}>{filtered.length} record{filtered.length !== 1 ? "s" : ""}</span>
+      </div>
+      {filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: 40, color: C.grayLight, border: `1.5px dashed ${C.border}`, borderRadius: 12 }}>No records found</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {history.map(entry => {
+          {filtered.map(entry => {
             const mins = entry.duration_seconds ? Math.floor(entry.duration_seconds / 60) : 0;
             const secs = entry.duration_seconds ? entry.duration_seconds % 60 : 0;
             return (
@@ -871,7 +896,7 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
     .sig-area { display: flex; gap: 20px; }
     .sig { text-align: center; }
     .sig-line {
-      width: 90px;
+      width: 160px;
       border-bottom: 2px solid #000;
       margin-bottom: 2px;
       height: 18px;
@@ -913,15 +938,9 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
     </div>
     <div class="footer">
       <div class="footer-msg">Carry this pass at all times in the hallway</div>
-      <div class="sig-area">
-        <div class="sig">
-          <div class="sig-line"></div>
-          <div class="sig-label">Signature</div>
-        </div>
-        <div class="sig">
-          <div class="sig-line"></div>
-          <div class="sig-label">Return by</div>
-        </div>
+      <div class="sig">
+        <div class="sig-line"></div>
+        <div class="sig-label">Teacher Signature</div>
       </div>
     </div>
   </div>
