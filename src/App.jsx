@@ -801,28 +801,30 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
       overflow: hidden;
     }
     .school-bar {
-      background: #000;
-      color: #fff;
+      background: #fff;
+      color: #000;
       text-align: center;
       padding: 5px 16px;
       font-size: 13pt;
       font-weight: 900;
       letter-spacing: 2px;
       text-transform: uppercase;
+      border-bottom: 2px solid #000;
     }
     .header {
-      background: #333;
-      color: #fff;
+      background: #fff;
+      color: #000;
       padding: 7px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 2px solid #000;
     }
-    .header-title { font-size: 10pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85; }
-    .header-class { font-size: 15pt; font-weight: 800; margin-top: 1px; }
+    .header-title { font-size: 10pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #000; }
+    .header-class { font-size: 15pt; font-weight: 800; margin-top: 1px; color: #000; }
     .header-right { text-align: right; }
-    .header-label { font-size: 9pt; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
-    .header-teacher { font-size: 14pt; font-weight: 700; }
+    .header-label { font-size: 9pt; letter-spacing: 1px; text-transform: uppercase; color: #000; }
+    .header-teacher { font-size: 14pt; font-weight: 700; color: #000; }
     .body {
       flex: 1;
       padding: 8px 16px;
@@ -830,6 +832,7 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
       grid-template-columns: 1fr 1fr 1fr;
       gap: 6px 14px;
       align-content: start;
+      background: #fff;
     }
     .field-student { grid-column: 1 / -1; }
     .field-label {
@@ -837,7 +840,7 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: #444;
+      color: #000;
       margin-bottom: 2px;
     }
     .field-value {
@@ -847,31 +850,33 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
       padding-bottom: 2px;
       min-height: 28px;
       line-height: 1.1;
+      color: #000;
     }
-    .field-value.small { font-size: 14pt; font-weight: 700; }
+    .field-value.small { font-size: 14pt; font-weight: 700; color: #000; }
     .footer {
       border-top: 2px solid #000;
       padding: 6px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #f0f0f0;
+      background: #fff;
     }
     .footer-msg {
       font-size: 9pt;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+      color: #000;
     }
     .sig-area { display: flex; gap: 20px; }
     .sig { text-align: center; }
     .sig-line {
       width: 90px;
-      border-bottom: 1.5px solid #000;
+      border-bottom: 2px solid #000;
       margin-bottom: 2px;
       height: 18px;
     }
-    .sig-label { font-size: 9pt; font-weight: 600; color: #444; }
+    .sig-label { font-size: 9pt; font-weight: 600; color: #000; }
     @media print { body { margin: 0; } }
   </style>
 </head>
@@ -931,4 +936,3 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
 
   return null;
 }
-
