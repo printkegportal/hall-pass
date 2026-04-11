@@ -780,12 +780,12 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
   <style>
     @page {
       size: 6in 4in;
-      margin: 0.18in;
+      margin: 0.15in;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      width: 5.64in;
-      height: 3.64in;
+      width: 5.7in;
+      height: 3.7in;
       font-family: Arial, Helvetica, sans-serif;
       color: #000;
       background: #fff;
@@ -795,84 +795,91 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
       width: 100%;
       height: 100%;
       border: 2.5px solid #000;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
-    .header {
+    .school-bar {
       background: #000;
       color: #fff;
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .header-left { }
-    .header-title { font-size: 11pt; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
-    .header-class { font-size: 14pt; font-weight: 700; margin-top: 1px; }
-    .header-right { text-align: right; }
-    .header-label { font-size: 8pt; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
-    .header-teacher { font-size: 12pt; font-weight: 700; }
-    .body {
-      flex: 1;
-      padding: 10px 16px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: auto auto;
-      gap: 8px 14px;
-      align-content: start;
-    }
-    .field-student { grid-column: 1 / -1; }
-    .field-label {
-      font-size: 7.5pt;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #555;
-      margin-bottom: 3px;
-    }
-    .field-value {
+      text-align: center;
+      padding: 5px 16px;
       font-size: 13pt;
-      font-weight: 800;
-      border-bottom: 2px solid #000;
-      padding-bottom: 3px;
-      min-height: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
-    .field-value.small { font-size: 11pt; }
-    .footer {
-      border-top: 2px solid #000;
+    .header {
+      background: #333;
+      color: #fff;
       padding: 7px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #f5f5f5;
     }
-    .footer-msg {
-      font-size: 7.5pt;
+    .header-title { font-size: 10pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: 0.85; }
+    .header-class { font-size: 15pt; font-weight: 800; margin-top: 1px; }
+    .header-right { text-align: right; }
+    .header-label { font-size: 9pt; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
+    .header-teacher { font-size: 14pt; font-weight: 700; }
+    .body {
+      flex: 1;
+      padding: 8px 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px 14px;
+      align-content: start;
+    }
+    .field-student { grid-column: 1 / -1; }
+    .field-label {
+      font-size: 9pt;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
+      color: #444;
+      margin-bottom: 2px;
     }
-    .sig-area {
+    .field-value {
+      font-size: 17pt;
+      font-weight: 800;
+      border-bottom: 2px solid #000;
+      padding-bottom: 2px;
+      min-height: 28px;
+      line-height: 1.1;
+    }
+    .field-value.small { font-size: 14pt; font-weight: 700; }
+    .footer {
+      border-top: 2px solid #000;
+      padding: 6px 16px;
       display: flex;
-      gap: 24px;
+      align-items: center;
+      justify-content: space-between;
+      background: #f0f0f0;
     }
+    .footer-msg {
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .sig-area { display: flex; gap: 20px; }
     .sig { text-align: center; }
     .sig-line {
-      width: 80px;
+      width: 90px;
       border-bottom: 1.5px solid #000;
       margin-bottom: 2px;
-      height: 16px;
+      height: 18px;
     }
-    .sig-label { font-size: 7pt; letter-spacing: 0.5px; color: #555; }
+    .sig-label { font-size: 9pt; font-weight: 600; color: #444; }
     @media print { body { margin: 0; } }
   </style>
 </head>
 <body>
   <div class="pass">
+    <div class="school-bar">Bridges Preparatory School</div>
     <div class="header">
-      <div class="header-left">
+      <div>
         <div class="header-title">Hall Pass</div>
         <div class="header-class">${className}</div>
       </div>
@@ -924,3 +931,4 @@ function PrintPassModal({ pass, teacherName, className, onClose }) {
 
   return null;
 }
+
